@@ -14,7 +14,7 @@ export function Header() {
             height={180}
           />
         </Link>
-        <Button className="bg-katsumeme-purple hover:bg-katsumeme-purple/90">
+        <Button className="bg-katsumeme-purple hover:bg-katsumeme-purple/90 text-white">
           Se connecter
         </Button>
       </div>
