@@ -1,43 +1,30 @@
 import Image from "next/image";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Heart, MessageCircle, Share2 } from "lucide-react";
+import Link from "next/link";
+import { Card, CardContent } from "@/components/ui/card";
+import { MemeCardHeader } from "@/components/MemeCardHeader";
+import { MemeCardFooter } from "@/components/MemeCardFooter";
+
+import { Meme } from "@/type";
 
 interface MemeCardProps {
-  imageUrl: string;
-  title: string;
-  likes: number;
-  comments: number;
+  meme: Meme;
 }
-
-export function MemeCard({ imageUrl, title, likes, comments }: MemeCardProps) {
+export function MemeCard({ meme }: MemeCardProps) {
   return (
-    <Card className="overflow-hidden">
-      <CardContent className="p-0">
-        <Image
-          src={imageUrl}
-          alt={title}
-          width={500}
-          height={500}
-          className="w-full h-auto"
-        />
+    <Card className="overflow-hidden group">
+      <MemeCardHeader detail={false} meme={meme} />
+      <CardContent className="p-0 relative">
+        <Link href={`/meme/${meme.id}`}>
+          <Image
+            src={meme.imageUrl}
+            alt={meme.title}
+            width={500}
+            height={500}
+            className="w-full h-auto hover:scale-105 transition-transform duration-300"
+          />
+        </Link>
       </CardContent>
-      <CardFooter className="flex justify-between items-center p-4">
-        <h3 className="font-semibold">{title}</h3>
-        <div className="flex space-x-2">
-          <Button variant="ghost" size="icon">
-            <Heart className="h-4 w-4 mr-2" />
-            {likes}
-          </Button>
-          <Button variant="ghost" size="icon">
-            <MessageCircle className="h-4 w-4 mr-2" />
-            {comments}
-          </Button>
-          <Button variant="ghost" size="icon">
-            <Share2 className="h-4 w-4" />
-          </Button>
-        </div>
-      </CardFooter>
+      <MemeCardFooter meme={meme} detail={false} />
     </Card>
   );
 }

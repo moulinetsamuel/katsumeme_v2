@@ -23,13 +23,13 @@ export function SidebarContent() {
           Top Rated
         </Button>
         <Button variant="ghost" className="w-full justify-start">
-          Programming
+          Bad Rated
         </Button>
         <Button variant="ghost" className="w-full justify-start">
-          Web Dev
+          Aléatoire
         </Button>
         <Button variant="ghost" className="w-full justify-start">
-          School Life
+          Most Comment
         </Button>
       </div>
     </div>

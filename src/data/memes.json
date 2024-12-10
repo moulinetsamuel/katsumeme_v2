@@ -1,0 +1,130 @@
+[
+  {
+    "id": 1,
+    "imageUrl": "https://urlme.me/success/typed_a_url/made_a_meme.jpg?source=www",
+    "title": "When the code finally works",
+    "author": "John Doe",
+    "publishedAt": "2 hours ago",
+    "likes": 100,
+    "dislikes": 20,
+    "comments": [
+      {
+        "id": 1,
+        "author": "User1",
+        "content": "This is so relatable!",
+        "publishedAt": "1 hour ago",
+        "likes": 100,
+        "dislikes": 20
+      },
+      {
+        "id": 2,
+        "author": "User2",
+        "content": "Happens to me all the time 😂",
+        "publishedAt": "30 minutes ago",
+        "likes": 100,
+        "dislikes": 20
+      }
+    ],
+    "tags": [
+      { "id": 1, "name": "programming" },
+      { "id": 2, "name": "web dev" }
+    ],
+    "isFavorite": true
+  },
+  {
+    "id": 2,
+    "imageUrl": "https://urlme.me/success/typed_a_url/made_a_meme.jpg?source=www",
+    "title": "When the code finally works",
+    "author": "John Doe",
+    "publishedAt": "2 hours ago",
+    "likes": 100,
+    "dislikes": 20,
+    "comments": [
+      {
+        "id": 1,
+        "author": "User1",
+        "content": "This is so relatable!",
+        "publishedAt": "1 hour ago",
+        "likes": 100,
+        "dislikes": 20
+      },
+      {
+        "id": 2,
+        "author": "User2",
+        "content": "Happens to me all the time 😂",
+        "publishedAt": "30 minutes ago",
+        "likes": 100,
+        "dislikes": 20
+      }
+    ],
+    "tags": [
+      { "id": 1, "name": "programming" },
+      { "id": 2, "name": "web dev" }
+    ],
+    "isFavorite": false
+  },
+  {
+    "id": 3,
+    "imageUrl": "https://urlme.me/success/typed_a_url/made_a_meme.jpg?source=www",
+    "title": "When the code finally works",
+    "author": "John Doe",
+    "publishedAt": "2 hours ago",
+    "likes": 100,
+    "dislikes": 20,
+    "comments": [
+      {
+        "id": 1,
+        "author": "User1",
+        "content": "This is so relatable!",
+        "publishedAt": "1 hour ago",
+        "likes": 100,
+        "dislikes": 20
+      },
+      {
+        "id": 2,
+        "author": "User2",
+        "content": "Happens to me all the time 😂",
+        "publishedAt": "30 minutes ago",
+        "likes": 100,
+        "dislikes": 20
+      }
+    ],
+    "tags": [
+      { "id": 1, "name": "programming" },
+      { "id": 2, "name": "web dev" }
+    ],
+    "isFavorite": true
+  },
+  {
+    "id": 4,
+    "imageUrl": "https://urlme.me/success/typed_a_url/made_a_meme.jpg?source=www",
+    "title": "When the code finally works",
+    "author": "John Doe",
+    "publishedAt": "2 hours ago",
+    "likes": 100,
+    "dislikes": 20,
+    "comments": [
+      {
+        "id": 1,
+        "author": "User1",
+        "content": "This is so relatable!",
+        "publishedAt": "1 hour ago",
+        "likes": 100,
+        "dislikes": 20
+      },
+      {
+        "id": 2,
+        "author": "User2",
+        "content": "Happens to me all the time 😂",
+        "publishedAt": "30 minutes ago",
+        "likes": 100,
+        "dislikes": 20
+      }
+    ],
+    "tags": [
+      { "id": 1, "name": "programming" },
+      { "id": 2, "name": "web dev" }
+    ],
+    "isFavorite": false
+  }
+]

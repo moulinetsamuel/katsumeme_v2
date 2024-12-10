@@ -23,7 +23,7 @@ export function Sidebar() {
           <Button
             variant="outline"
             size="icon"
-            className="fixed bottom-4 right-4 z-50 md:hidden"
+            className="fixed bottom-4 right-4 z-50 md:hidden bg-katsumeme-green"
           >
             <Menu />
           </Button>
