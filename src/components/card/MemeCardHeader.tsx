@@ -1,7 +1,11 @@
-import { CardHeader } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { CardHeader } from "@/src/components/ui/card";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/src/components/ui/avatar";
 import Link from "next/link";
-import { Meme } from "@/type";
+import { Meme } from "@/src/type";
 
 interface MemeHeaderProps {
   meme: Meme;

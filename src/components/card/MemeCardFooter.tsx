@@ -3,10 +3,10 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+} from "@/src/components/ui/tooltip";
+import { CardFooter } from "@/src/components/ui/card";
+import { Button } from "@/src/components/ui/button";
+import { Badge } from "@/src/components/ui/badge";
 import {
   Download,
   MessageCircle,
@@ -16,7 +16,7 @@ import {
   TriangleAlert,
 } from "lucide-react";
 import Link from "next/link";
-import { Meme } from "@/type";
+import { Meme } from "@/src/type";
 
 interface MemeCardFooterProps {
   meme: Meme;

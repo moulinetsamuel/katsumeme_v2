@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/src/components/ui/button";
 import { Menu } from "lucide-react";
 import {
   Sheet,
@@ -6,8 +6,8 @@ import {
   SheetDescription,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet";
-import { SidebarContent } from "@/components/SidebarContent";
+} from "@/src/components/ui/sheet";
+import { SidebarContent } from "@/src/components/sidebar/SidebarContent";
 
 export function Sidebar() {
   return (

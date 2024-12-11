@@ -1,10 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Card, CardContent } from "@/components/ui/card";
-import { MemeCardHeader } from "@/components/MemeCardHeader";
-import { MemeCardFooter } from "@/components/MemeCardFooter";
+import { Card, CardContent } from "@/src/components/ui/card";
+import { MemeCardHeader } from "@/src/components/card/MemeCardHeader";
+import { MemeCardFooter } from "@/src/components/card/MemeCardFooter";
 
-import { Meme } from "@/type";
+import { Meme } from "@/src/type";
 
 interface MemeCardProps {
   meme: Meme;

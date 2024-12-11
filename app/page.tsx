@@ -1,10 +1,10 @@
-import { Header } from "@/components/Header";
-import { Sidebar } from "@/components/Sidebar";
-import { MemeCard } from "@/components/MemeCard";
+import { Header } from "@/src/components/Header";
+import { Sidebar } from "@/src/components/sidebar/Sidebar";
+import { MemeCard } from "@/src/components/card/MemeCard";
 
 // TODO simule les données venant du future store zustand
 //TODO simule la methode getMemes du future store zustand
-import memes from "@/data/memes.json";
+import memes from "@/src/data/memes.json";
 import { notFound } from "next/navigation";
 
 export default function Home() {

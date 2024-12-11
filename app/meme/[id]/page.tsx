@@ -2,14 +2,14 @@
 
 import { notFound, useParams } from "next/navigation";
 import Image from "next/image";
-import { Header } from "@/components/Header";
-import { MemeCardHeader } from "@/components/MemeCardHeader";
-import { MemeCardFooter } from "@/components/MemeCardFooter";
-import { CommentSection } from "@/components/CommentSection";
-import { Card, CardContent } from "@/components/ui/card";
+import { Header } from "@/src/components/Header";
+import { MemeCardHeader } from "@/src/components/card/MemeCardHeader";
+import { MemeCardFooter } from "@/src/components/card/MemeCardFooter";
+import { CommentSection } from "@/src/components/comment/CommentSection";
+import { Card, CardContent } from "@/src/components/ui/card";
 
 // TODO simule les données venant du future store zustand
-import memes from "@/data/memes.json";
+import memes from "@/src/data/memes.json";
 
 export default function MemePage() {
   const { id } = useParams();

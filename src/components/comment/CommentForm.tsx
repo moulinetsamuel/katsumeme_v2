@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/src/components/ui/button";
+import { Card, CardContent } from "@/src/components/ui/card";
+import { Textarea } from "@/src/components/ui/textarea";
 
 export function CommentForm() {
   const [newComment, setNewComment] = useState("");

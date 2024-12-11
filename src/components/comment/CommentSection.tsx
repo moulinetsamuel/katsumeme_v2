@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CommentForm } from "@/components/CommentForm";
-import { CommentList } from "@/components/CommentList";
-import { CommentSorting } from "@/components/CommentSorting";
+import { CommentForm } from "@/src/components/comment/CommentForm";
+import { CommentList } from "@/src/components/comment/CommentList";
+import { CommentSorting } from "@/src/components/comment/CommentSorting";
 
 // TODO simule les données venant du future store zustand
-import memes from "@/data/memes.json";
-import { Comment } from "@/type";
+import memes from "@/src/data/memes.json";
+import { Comment } from "@/src/type";
 
 interface CommentSectionProps {
   memeId: number;
