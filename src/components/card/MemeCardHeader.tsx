@@ -20,8 +20,9 @@ export function MemeCardHeader({ meme, detail }: MemeHeaderProps) {
       <div className="flex items-center justify-between">
         <div className="flex gap-2 items-center">
           <Avatar>
-            <AvatarImage src="author.avatarUrl" alt={author} />
-            <AvatarFallback>{author.charAt(0)}</AvatarFallback>
+            {/* TODO remplacer par les donné du store User */}
+            <AvatarImage src="meme.author.avatarUrl" alt={author} />
+            <AvatarFallback>{"meme.author.charAt(0)"}</AvatarFallback>
           </Avatar>
           <div>
             <div className="font-semibold">{author}</div>

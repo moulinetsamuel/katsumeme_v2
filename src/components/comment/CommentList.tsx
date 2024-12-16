@@ -35,8 +35,11 @@ export function CommentList({ comments }: CommentListProps) {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Avatar>
-                    <AvatarImage src="" alt={comment.author} />
-                    <AvatarFallback>{comment.author[0]}</AvatarFallback>
+                    <AvatarImage
+                      src="comment.author.avatarUrl"
+                      alt={comment.author}
+                    />
+                    <AvatarFallback>{"comment.author[0]"}</AvatarFallback>
                   </Avatar>
                   <div>
                     <div className="font-semibold">{comment.author}</div>
