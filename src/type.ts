@@ -1,3 +1,11 @@
+export interface User {
+  id: number;
+  email: string;
+  pseudo: string;
+  avatar_url: string;
+  role: "USER" | "ADMIN";
+}
+
 export interface Meme {
   id: number;
   imageUrl: string;
@@ -23,11 +31,4 @@ export interface Comment {
 export interface Tags {
   id: number;
   name: string;
-}
-
-export interface User {
-  id: number;
-  username: string;
-  email: string;
-  avatarUrl: string;
 }

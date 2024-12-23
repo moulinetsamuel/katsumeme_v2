@@ -5,13 +5,30 @@ import Image from "next/image";
 import { Button } from "@/src/components/ui/button";
 import { useState } from "react";
 import { AuthModal } from "@/src/components/auth/AuthModal";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/src/components/ui/avatar";
+import { useAuthStore } from "@/src/store/useAuthStore";
+import { useToast } from "@/src/hooks/use-toast";
 
 export function Header() {
-  // TODO remplacer par un état de connexion avec zustand
-  const isLogin = false;
-
   const [showAuthModal, setShowAuthModal] = useState(false);
+
+  const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
+  const logout = useAuthStore((state) => state.logout);
+  const user = useAuthStore((state) => state.user);
+
+  const { toast } = useToast();
+
+  const handleLogout = () => {
+    logout();
+    toast({
+      title: "Déconnexion réussie",
+      description: "Vous avez été déconnecté avec succès",
+    });
+  };
 
   return (
     <>
@@ -25,14 +42,27 @@ export function Header() {
               height={180}
             />
           </Link>
-          {isLogin ? (
-            <Link href="/profile">
-              <Avatar>
-                {/* TODO remplacer par les donné du store User */}
-                <AvatarImage src="/avatar.jpg" alt="User avatar" />
-                <AvatarFallback>U</AvatarFallback>
-              </Avatar>
-            </Link>
+          {isLoggedIn ? (
+            <div className="flex items-center space-x-4">
+              <Link href="/profile">
+                <Avatar>
+                  <AvatarImage
+                    src={user?.avatar_url}
+                    alt={`Avatar de ${user?.pseudo}`}
+                  />
+                  <AvatarFallback>
+                    {user?.pseudo.charAt(0).toLocaleUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+              </Link>
+              <Button
+                className="bg-katsumeme-purple hover:bg-katsumeme-purple/90 text-white"
+                onClick={handleLogout}
+              >
+                {" "}
+                Se déconnecter{" "}
+              </Button>
+            </div>
           ) : (
             <Button
               className="bg-katsumeme-purple hover:bg-katsumeme-purple/90 text-white"

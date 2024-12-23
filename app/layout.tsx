@@ -1,3 +1,4 @@
+import { Toaster } from "@/src/components/ui/toaster";
 import "./globals.css";
 import { Inter, Poppins } from "next/font/google";
 
@@ -25,6 +26,7 @@ export default function RootLayout({
       >
         {children}
       </body>
+      <Toaster />
     </html>
   );
 }
