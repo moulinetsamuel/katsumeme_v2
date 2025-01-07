@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/src/components/ui/dialog";
@@ -13,8 +15,7 @@ import { useAuthStore } from "@/src/store/useAuthStore";
 import { useToast } from "@/src/hooks/use-toast";
 import { Button } from "@/src/components/ui/button";
 import { register } from "@/src/services/authService";
-import { useRouter } from "next/navigation";
-import { RegisterFormData } from "@/src/utils/schemas/authSchemas";
+import { RegisterBackendData } from "@/src/utils/schemas/authSchemas";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -38,23 +39,13 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
   const { toast } = useToast();
 
-  const handleRegister = async (data: RegisterFormData) => {
-    const registerData = {
-      email: data.email,
-      password: data.password,
-      pseudo: data.pseudo,
-    };
-
+  const handleRegister = async (data: RegisterBackendData) => {
     setIsLoading(true);
     setErrorMessage(null);
 
     try {
-      await register(registerData);
-      const params = new URLSearchParams({
-        email: data.email,
-        pseudo: data.pseudo,
-      });
-      router.push(`/auth/verify-email?${params.toString()}`);
+      const result = await register(data);
+      router.push(`/welcome?token=${result.token}`);
     } catch (error) {
       if (error instanceof Error) {
         setErrorMessage(error.message || "Erreur lors de l'inscription");
@@ -89,6 +80,11 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
           <DialogTitle className="text-2xl font-bold text-center">
             {isLogin ? "Connexion" : "Création de compte"}
           </DialogTitle>
+          <DialogDescription className="text-center">
+            {isLogin
+              ? "Connectez-vous à votre compte"
+              : "Créez un compte pour accéder à toutes les fonctionnalités"}
+          </DialogDescription>
         </DialogHeader>
         {isLogin ? (
           <>

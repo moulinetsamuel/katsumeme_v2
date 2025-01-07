@@ -5,12 +5,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
-import { Mail, User, Lock } from "lucide-react";
+import { Mail, User, Lock, Eye, EyeOff } from "lucide-react";
 import { ErrorFormMessage } from "@/src/components/ErrorFormMessage";
 import {
   RegisterFormData,
   registerFormSchema,
 } from "@/src/utils/schemas/authSchemas";
+import { useState } from "react";
 
 interface RegisterFormProps {
   onRegister: (data: RegisterFormData) => Promise<void>;
@@ -23,6 +24,9 @@ export function RegisterForm({
   isLoading,
   errorMessage,
 }: RegisterFormProps) {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -80,12 +84,28 @@ export function RegisterForm({
           <Lock className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" />
           <Input
             id="password"
-            type="password"
+            type={showPassword ? "text" : "password"}
             {...register("password")}
             placeholder="Mot de passe"
             aria-invalid={!!errors.password}
-            className="pl-10"
+            className="pl-10 pr-10"
           />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            aria-label={
+              showPassword
+                ? "Masquer le mot de passe"
+                : "Afficher le mot de passe"
+            }
+          >
+            {showPassword ? (
+              <EyeOff className="h-5 w-5" />
+            ) : (
+              <Eye className="h-5 w-5" />
+            )}
+          </button>
         </div>
         <ErrorFormMessage message={errors.password?.message} />
       </div>
@@ -99,16 +119,31 @@ export function RegisterForm({
           <Lock className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" />
           <Input
             id="confirmPassword"
-            type="password"
+            type={showConfirmPassword ? "text" : "password"}
             {...register("confirmPassword")}
             placeholder="Confirmez le mot de passe"
             aria-invalid={!!errors.confirmPassword}
-            className="pl-10"
+            className="pl-10 pr-10"
           />
+          <button
+            type="button"
+            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            aria-label={
+              showConfirmPassword
+                ? "Masquer la confirmation du mot de passe"
+                : "Afficher la confirmation du mot de passe"
+            }
+          >
+            {showConfirmPassword ? (
+              <EyeOff className="h-5 w-5" />
+            ) : (
+              <Eye className="h-5 w-5" />
+            )}
+          </button>
         </div>
         <ErrorFormMessage message={errors.confirmPassword?.message} />
       </div>
-
       {/* Message d'erreur */}
       {errorMessage && (
         <div className="text-red-500 text-sm text-center">{errorMessage}</div>

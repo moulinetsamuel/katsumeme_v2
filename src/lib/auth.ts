@@ -1,14 +1,15 @@
 import bcrypt from "bcryptjs";
-import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import prisma from "@/src/lib/prisma";
 import { sendVerificationEmail } from "@/src/lib/email";
 import { RegisterBackendData } from "@/src/utils/schemas/authSchemas";
+import { generateVerificationToken } from "@/src/lib/token";
 
 export async function createUser(data: RegisterBackendData) {
+  const now = new Date();
   const hashedPassword = await bcrypt.hash(data.password, 10);
-  const verificationToken = crypto.randomBytes(32).toString("hex");
-  const tokenExpiresAt = new Date(Date.now() + 3600000); // 1 hour
+
+  const { verificationToken, tokenExpiresAt } = generateVerificationToken();
 
   const defaultAvatars = [
     "avatar_default_1.jpeg",
@@ -29,12 +30,59 @@ export async function createUser(data: RegisterBackendData) {
         avatar_url: avatarUrl,
         verification_token: verificationToken,
         token_expires_at: tokenExpiresAt,
+        last_email_sent_at: now,
       },
     });
 
     await sendVerificationEmail(data.email, data.pseudo, verificationToken);
 
     return user;
+  });
+
+  return transaction;
+}
+
+export async function resendVerificationEmail(email: string) {
+  const user = await prisma.user.findUnique({ where: { email } });
+
+  if (!user) {
+    throw new Error("Utilisateur non trouvé");
+  }
+
+  if (user.is_verified) {
+    throw new Error("Email déjà vérifié");
+  }
+
+  const now = new Date();
+  const RESEND_DELAY_MS = 5 * 60 * 1000;
+  if (
+    user.last_email_sent_at &&
+    now.getTime() - user.last_email_sent_at.getTime() < RESEND_DELAY_MS
+  ) {
+    const timeSinceLastEmail =
+      now.getTime() - user.last_email_sent_at.getTime();
+    const timeLeft = Math.ceil((RESEND_DELAY_MS - timeSinceLastEmail) / 1000);
+
+    throw new Error(
+      `Veuillez attendre encore ${timeLeft} secondes avant de demander un nouvel email de vérification.`
+    );
+  }
+
+  const { verificationToken, tokenExpiresAt } = generateVerificationToken();
+
+  const transaction = await prisma.$transaction(async (prismaTx) => {
+    const updatedUser = await prismaTx.user.update({
+      where: { id: user.id },
+      data: {
+        verification_token: verificationToken,
+        token_expires_at: tokenExpiresAt,
+        last_email_sent_at: now,
+      },
+    });
+
+    await sendVerificationEmail(email, user.pseudo, verificationToken);
+
+    return updatedUser;
   });
 
   return transaction;
@@ -87,16 +135,3 @@ export async function loginUser(email: string, password: string) {
 
   return { user, token };
 }
-
-// TODO: A utiliser dans la route POST /api/auth/forgot-password ?
-// export function verifyToken(token: string) {
-//   try {
-//     return jwt.verify(token, JWT_SECRET) as {
-//       userId: string;
-//       email: string;
-//       role: string;
-//     };
-//   } catch (error) {
-//     throw new Error("Invalid token");
-//   }
-// }

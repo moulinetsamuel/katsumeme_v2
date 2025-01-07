@@ -1,5 +1,6 @@
 import { createUser } from "@/src/lib/auth";
 import { logger } from "@/src/lib/logger";
+import { generateTemporaryToken } from "@/src/lib/token";
 import { registerBackendSchema } from "@/src/utils/schemas/authSchemas";
 import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
@@ -11,14 +12,17 @@ export async function POST(req: Request) {
 
     const validatedData = registerBackendSchema.parse(body);
 
-    await createUser(validatedData);
+    const user = await createUser(validatedData);
+
+    const temporaryToken = generateTemporaryToken(user.id);
 
     logger.info("User created successfully:", {
-      email: validatedData.email,
-      pseudo: validatedData.pseudo,
+      email: user.email,
+      pseudo: user.pseudo,
     });
+
     return NextResponse.json(
-      { message: "User created successfully" },
+      { message: "Inscription réussie", token: temporaryToken },
       { status: 201 }
     );
   } catch (error) {
