@@ -12,6 +12,7 @@ CREATE TABLE "User" (
     "is_verified" BOOLEAN NOT NULL DEFAULT false,
     "verification_token" TEXT,
     "token_expires_at" TIMESTAMP(3),
+    "last_email_sent_at" TIMESTAMP(3),
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 

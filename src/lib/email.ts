@@ -6,7 +6,7 @@ export async function sendVerificationEmail(
   username: string,
   token: string
 ) {
-  const verificationLink = `${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/verify-email?token=${token}`;
+  const verificationLink = `${process.env.NEXT_PUBLIC_BASE_URL}/verify-email?token=${token}`;
 
   try {
     await emailjs.send(

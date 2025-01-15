@@ -1,5 +1,6 @@
 import { User } from "@/src/type";
 import { RegisterBackendData } from "@/src/utils/schemas/authSchemas";
+import { ApiError } from "@/src/lib/errors";
 
 // TODO: A déplacer dans le fichier types.ts si besoin ailleurs
 interface LoginData {
@@ -53,6 +54,21 @@ export async function verifyToken(token: string) {
 
   if (!response.ok) {
     throw new Error(responseData.message || "Erreur lors de la vérification");
+  }
+
+  return responseData;
+}
+
+export async function verifyEmail(token: string) {
+  const response = await fetch(`/api/auth/verify-email?token=${token}`);
+
+  const responseData = await response.json();
+
+  if (!response.ok) {
+    throw new ApiError<{ email: string }>(
+      responseData.message,
+      responseData.data
+    );
   }
 
   return responseData;

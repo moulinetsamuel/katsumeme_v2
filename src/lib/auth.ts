@@ -4,6 +4,7 @@ import prisma from "@/src/lib/prisma";
 import { sendVerificationEmail } from "@/src/lib/email";
 import { RegisterBackendData } from "@/src/utils/schemas/authSchemas";
 import { generateVerificationToken } from "@/src/lib/token";
+import { ApiError } from "@/src/lib/errors";
 
 export async function createUser(data: RegisterBackendData) {
   const now = new Date();
@@ -88,29 +89,35 @@ export async function resendVerificationEmail(email: string) {
   return transaction;
 }
 
-// TODO: A utiliser dans la route GET /api/auth/verify-email
 export async function verifyEmail(token: string) {
   const user = await prisma.user.findFirst({
     where: {
       verification_token: token,
-      token_expires_at: { gt: new Date() },
     },
   });
 
   if (!user) {
-    throw new Error("Invalid or expired token");
+    throw new ApiError("Token invalide");
   }
 
-  await prisma.user.update({
+  if (user.is_verified) {
+    throw new ApiError("Compte déjà vérifié");
+  }
+
+  if (user.token_expires_at && user.token_expires_at < new Date()) {
+    throw new ApiError<{ email: string }>("Token expiré", {
+      email: user.email,
+    });
+  }
+
+  const { email, pseudo } = await prisma.user.update({
     where: { id: user.id },
     data: {
       is_verified: true,
-      verification_token: null,
-      token_expires_at: null,
     },
   });
 
-  return user;
+  return { email, pseudo };
 }
 
 // TODO: A utiliser dans la route POST /api/auth/login

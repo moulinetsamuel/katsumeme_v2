@@ -14,8 +14,12 @@ import { RegisterForm } from "@/src/components/auth/RegisterForm";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useToast } from "@/src/hooks/use-toast";
 import { Button } from "@/src/components/ui/button";
-import { register } from "@/src/services/authService";
-import { RegisterBackendData } from "@/src/utils/schemas/authSchemas";
+import { register, resendVerificationEmail } from "@/src/services/authService";
+import {
+  RegisterBackendData,
+  ResendFormData,
+} from "@/src/utils/schemas/authSchemas";
+import { ResendForm } from "@/src/components/auth/ResendForm";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -23,14 +27,16 @@ interface AuthModalProps {
 }
 
 export function AuthModal({ isOpen, onClose }: AuthModalProps) {
-  const [isLogin, setIsLogin] = useState(true);
+  const [formType, setFormType] = useState<"login" | "register" | "resend">(
+    "login"
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
     if (!isOpen) {
-      setIsLogin(true);
+      setFormType("login");
       setErrorMessage(null);
     }
   }, [isOpen]);
@@ -51,6 +57,30 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         setErrorMessage(error.message || "Erreur lors de l'inscription");
       } else {
         setErrorMessage("Erreur lors de l'inscription");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResend = async (data: ResendFormData) => {
+    setIsLoading(true);
+    setErrorMessage(null);
+
+    try {
+      const result = await resendVerificationEmail(data.email);
+      toast({
+        title: "Email envoyé",
+        description: result.message,
+      });
+      setFormType("login");
+    } catch (error) {
+      if (error instanceof Error) {
+        setErrorMessage(
+          error.message || "Erreur lors de l'envoi de l'email de validation"
+        );
+      } else {
+        setErrorMessage("Erreur inconnue, veuillez réessayer.");
       }
     } finally {
       setIsLoading(false);
@@ -78,15 +108,18 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-center">
-            {isLogin ? "Connexion" : "Création de compte"}
+            {formType === "login" && "Connexion"}
+            {formType === "register" && "Inscription"}
+            {formType === "resend" && "Renvoyer l'email de validation"}
           </DialogTitle>
           <DialogDescription className="text-center">
-            {isLogin
-              ? "Connectez-vous à votre compte"
-              : "Créez un compte pour accéder à toutes les fonctionnalités"}
+            {formType === "login" && "Connectez-vous à votre compte"}
+            {formType === "register" && "Créez votre compte"}
+            {formType === "resend" &&
+              "Entrez votre email pour recevoir un nouveau lien de validation"}
           </DialogDescription>
         </DialogHeader>
-        {isLogin ? (
+        {formType === "login" && (
           <>
             <LoginForm onLogin={handleLogin} isLoading={isLoading} />
             <div className="text-center text-sm">
@@ -96,13 +129,24 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
               <Button
                 variant="link"
                 className="text-katsumeme-purple p-0"
-                onClick={() => setIsLogin(false)}
+                onClick={() => setFormType("register")}
               >
                 S&apos;inscrire
               </Button>
             </div>
+            <div className="text-center text-sm">
+              <Button
+                variant="link"
+                className="text-katsumeme-purple p-0"
+                onClick={() => setFormType("resend")}
+              >
+                Renvoyer l&apos;email de validation
+              </Button>
+            </div>
           </>
-        ) : (
+        )}
+
+        {formType === "register" && (
           <>
             <RegisterForm
               onRegister={handleRegister}
@@ -114,7 +158,29 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
               <Button
                 variant="link"
                 className="text-katsumeme-purple p-0"
-                onClick={() => setIsLogin(true)}
+                onClick={() => setFormType("login")}
+              >
+                Se connecter
+              </Button>
+            </div>
+          </>
+        )}
+
+        {formType === "resend" && (
+          <>
+            <ResendForm
+              onResend={handleResend}
+              isLoading={isLoading}
+              errorMessage={errorMessage}
+            />
+            <div className="text-center text-sm">
+              <span className="text-muted-foreground">
+                Retour à la connexion ?{" "}
+              </span>
+              <Button
+                variant="link"
+                className="text-katsumeme-purple p-0"
+                onClick={() => setFormType("login")}
               >
                 Se connecter
               </Button>

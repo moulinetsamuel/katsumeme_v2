@@ -24,10 +24,13 @@ export async function GET(req: Request) {
       });
 
       if (user) {
-        return NextResponse.json({
-          email: user.email,
-          pseudo: user.pseudo,
-        });
+        return NextResponse.json(
+          {
+            email: user.email,
+            pseudo: user.pseudo,
+          },
+          { status: 200 }
+        );
       } else {
         return NextResponse.json(
           { message: "Utilisateur non trouvé." },

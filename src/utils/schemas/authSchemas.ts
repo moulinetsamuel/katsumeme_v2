@@ -47,5 +47,8 @@ export const registerBackendSchema = baseSchema.omit({
   confirmPassword: true,
 });
 
+export const resendFormSchema = baseSchema.pick({ email: true });
+
 export type RegisterFormData = z.infer<typeof registerFormSchema>;
 export type RegisterBackendData = z.infer<typeof registerBackendSchema>;
+export type ResendFormData = z.infer<typeof resendFormSchema>;

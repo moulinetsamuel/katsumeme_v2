@@ -1,22 +1,40 @@
-import { NextApiRequest, NextApiResponse } from "next";
-import { verifyEmail } from "@//src/lib/auth";
+import { verifyEmail } from "@/src/lib/auth";
+import { ApiError } from "@/src/lib/errors";
+import { logger } from "@/src/lib/logger";
+import { NextResponse } from "next/server";
 
-export async function GET(req: NextApiRequest, res: NextApiResponse) {
-  const { token } = req.query;
-
-  if (!token || typeof token !== "string") {
-    return res.status(400).json({ message: "Invalid token" });
-  }
-
+export async function GET(req: Request) {
   try {
-    await verifyEmail(token);
+    const token = new URL(req.url).searchParams.get("token");
 
-    // TODO: metre en place un logger de succès
-    console.log("Email verified successfully");
-    res.status(200).json({ message: "Email verified successfully" });
+    if (!token) {
+      return NextResponse.json({ message: "Token manquant" }, { status: 400 });
+    }
+
+    const user = await verifyEmail(token);
+
+    logger.info("Email verified successfully:", {
+      email: user.email,
+      pseudo: user.pseudo,
+    });
+
+    return NextResponse.json(
+      { email: user.email, pseudo: user.pseudo },
+      { status: 200 }
+    );
   } catch (error) {
-    // TODO: metre en place un logger d'erreur
-    console.error("Email verification error:", error);
-    res.status(400).json({ message: "Invalid or expired token" });
+    logger.error("Erreur lors de la vérification de l'email:", error);
+
+    if (error instanceof ApiError) {
+      return NextResponse.json(
+        { message: error.message, data: error.data },
+        { status: 400 }
+      );
+    }
+
+    return NextResponse.json(
+      { message: "Erreur lors de la vérification de l'email" },
+      { status: 500 }
+    );
   }
 }
