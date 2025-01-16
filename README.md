@@ -1,5 +1,4 @@
-ajouter bouton pour renvoyer un email dans la modal de connexion
-metre en place la verification de l'email
+refacto verify-email page
 metre en place le login
 
 modal report meme et report comment

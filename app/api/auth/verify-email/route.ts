@@ -33,7 +33,9 @@ export async function GET(req: Request) {
     }
 
     return NextResponse.json(
-      { message: "Erreur lors de la vérification de l'email" },
+      {
+        message: "Une erreur est survenue lors de la vérification de l'email.",
+      },
       { status: 500 }
     );
   }
