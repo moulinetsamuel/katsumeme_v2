@@ -1,53 +1,42 @@
 import { logger } from "@/src/lib/logger";
-import jwt, { JwtPayload } from "jsonwebtoken";
 import { NextResponse } from "next/server";
-import prisma from "@/src/lib/prisma";
+import { ApiError } from "@/src/lib/errors";
+import { verifyJWT } from "@/src/lib/token";
+import { findUserById } from "@/src/lib/db";
 
 export async function GET(req: Request) {
-  const url = new URL(req.url);
-  const token = url.searchParams.get("token");
-
-  if (!token) {
-    return NextResponse.json({ message: "Token manquant" }, { status: 400 });
-  }
-
   try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
+    const token = new URL(req.url).searchParams.get("token");
 
-    if (
-      typeof payload === "object" &&
-      payload !== null &&
-      "userId" in payload
-    ) {
-      const user = await prisma.user.findUnique({
-        where: { id: payload.userId as string },
-      });
-
-      if (user) {
-        return NextResponse.json(
-          {
-            email: user.email,
-            pseudo: user.pseudo,
-          },
-          { status: 200 }
-        );
-      } else {
-        return NextResponse.json(
-          { message: "Utilisateur non trouvé." },
-          { status: 404 }
-        );
-      }
-    } else {
-      return NextResponse.json(
-        { message: "Le lien est invalide." },
-        { status: 400 }
-      );
+    if (!token) {
+      throw new ApiError("Token manquant", 400);
     }
+
+    const payload = verifyJWT(token);
+
+    const user = await findUserById(payload.userId);
+
+    if (!user) {
+      throw new ApiError("Utilisateur non trouvé", 404);
+    }
+
+    return NextResponse.json(
+      { email: user.email, pseudo: user.pseudo },
+      { status: 200 }
+    );
   } catch (error) {
     logger.error("Erreur lors de la vérification du token", error);
+
+    if (error instanceof ApiError) {
+      return NextResponse.json(
+        { message: error.message },
+        { status: error.status }
+      );
+    }
+
     return NextResponse.json(
-      { message: "Le lien est invalide ou expiré." },
-      { status: 400 }
+      { message: "Une erreur est survenue lors de la vérification du token" },
+      { status: 500 }
     );
   }
 }

@@ -1,4 +1,4 @@
-import { verifyEmail } from "@/src/lib/auth";
+import { findUserByToken, updateUserVerificationStatus } from "@/src/lib/db";
 import { ApiError } from "@/src/lib/errors";
 import { logger } from "@/src/lib/logger";
 import { NextResponse } from "next/server";
@@ -8,10 +8,26 @@ export async function GET(req: Request) {
     const token = new URL(req.url).searchParams.get("token");
 
     if (!token) {
-      return NextResponse.json({ message: "Token manquant" }, { status: 400 });
+      throw new ApiError("Token manquant", 400);
     }
 
-    const user = await verifyEmail(token);
+    const user = await findUserByToken(token);
+
+    if (!user) {
+      throw new ApiError("Token invalide", 400);
+    }
+
+    if (user.is_verified) {
+      throw new ApiError("Compte déjà vérifié", 400);
+    }
+
+    if (user.token_expires_at && user.token_expires_at < new Date()) {
+      throw new ApiError<{ email: string }>("Token expiré", 400, {
+        email: user.email,
+      });
+    }
+
+    await updateUserVerificationStatus(user.id);
 
     logger.info("Email verified successfully:", {
       email: user.email,

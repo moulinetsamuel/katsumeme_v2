@@ -1,6 +1,7 @@
-import { createUser } from "@/src/lib/auth";
+import { hashPassword } from "@/src/lib/auth";
+import { createUserWithSendVerificationEmail } from "@/src/lib/db";
 import { logger } from "@/src/lib/logger";
-import { generateTemporaryToken } from "@/src/lib/token";
+import { generateJWT, generateVerificationToken } from "@/src/lib/token";
 import { registerBackendSchema } from "@/src/utils/schemas/authSchemas";
 import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
@@ -9,12 +10,34 @@ import { z } from "zod";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-
     const validatedData = registerBackendSchema.parse(body);
 
-    const user = await createUser(validatedData);
+    const defaultAvatars = [
+      "avatar_default_1.jpeg",
+      "avatar_default_2.jpeg",
+      "avatar_default_3.jpeg",
+      "avatar_default_4.jpeg",
+    ];
+    const randomAvatar =
+      defaultAvatars[Math.floor(Math.random() * defaultAvatars.length)];
+    const avatarUrl = `https://${process.env.R2_PUBLIC_URL}/${randomAvatar}`;
 
-    const temporaryToken = generateTemporaryToken(user.id);
+    const hashedPassword = await hashPassword(validatedData.password);
+    const { verificationToken, tokenExpiresAt } = generateVerificationToken();
+
+    const user = await createUserWithSendVerificationEmail({
+      avatarUrl,
+      email: validatedData.email,
+      pseudo: validatedData.pseudo,
+      password: hashedPassword,
+      verificationToken,
+      tokenExpiresAt,
+    });
+
+    const temporaryToken = generateJWT({
+      userId: user.id,
+      expiresIn: "15m",
+    });
 
     logger.info("User created successfully:", {
       email: user.email,
@@ -27,7 +50,7 @@ export async function POST(req: Request) {
     );
   } catch (error) {
     logger.error("Erreur lors de l'inscription", error);
-    // Erreur de validation Zod
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { message: "Les données fournies sont invalides" },
@@ -35,7 +58,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Erreur d'unicité Prisma
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       if (error.code === "P2002") {
         const field = (error.meta?.target as string[])?.[0];
@@ -48,7 +70,6 @@ export async function POST(req: Request) {
       }
     }
 
-    // Autres erreurs
     return NextResponse.json(
       { message: "Une erreur est survenue lors de l'inscription" },
       { status: 500 }

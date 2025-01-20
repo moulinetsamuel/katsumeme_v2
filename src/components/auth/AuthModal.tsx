@@ -17,6 +17,7 @@ import { Button } from "@/src/components/ui/button";
 import { register, resendVerificationEmail } from "@/src/services/authService";
 import {
   RegisterBackendData,
+  RegisterFormData,
   ResendFormData,
 } from "@/src/utils/schemas/authSchemas";
 import { ResendForm } from "@/src/components/auth/ResendForm";
@@ -45,12 +46,18 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
   const { toast } = useToast();
 
-  const handleRegister = async (data: RegisterBackendData) => {
+  const handleRegister = async (data: RegisterFormData) => {
     setIsLoading(true);
     setErrorMessage(null);
 
+    const dataWithoutConfirmPassword: RegisterBackendData = {
+      email: data.email,
+      password: data.password,
+      pseudo: data.pseudo,
+    };
+
     try {
-      const result = await register(data);
+      const result = await register(dataWithoutConfirmPassword);
       router.push(`/welcome?token=${result.token}`);
     } catch (error) {
       if (error instanceof Error) {

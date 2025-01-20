@@ -4,6 +4,7 @@ export interface User {
   pseudo: string;
   avatar_url: string;
   role: "USER" | "ADMIN";
+  created_at: string;
 }
 
 export interface Meme {

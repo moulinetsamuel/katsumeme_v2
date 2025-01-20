@@ -1,20 +1,23 @@
 import emailjs from "@emailjs/nodejs";
 import { logger } from "@/src/lib/logger";
 
-export async function sendVerificationEmail(
-  to: string,
-  username: string,
-  token: string
-) {
-  const verificationLink = `${process.env.NEXT_PUBLIC_BASE_URL}/verify-email?token=${token}`;
+interface EmailOptions {
+  to_email: string;
+  username: string;
+  verification_link: string;
+}
+
+export async function sendVerificationEmail(options: EmailOptions) {
+  const { to_email, username, verification_link } = options;
+  const verificationLink = `${process.env.NEXT_PUBLIC_BASE_URL}/verify-email?token=${verification_link}`;
 
   try {
     await emailjs.send(
       process.env.EMAILJS_SERVICE_ID!,
       process.env.EMAILJS_TEMPLATE_ID!,
       {
-        to_email: to,
-        username: username,
+        to_email,
+        username,
         verification_link: verificationLink,
       },
       {
@@ -23,7 +26,7 @@ export async function sendVerificationEmail(
       }
     );
     logger.info("Verification email sent to", {
-      email: to,
+      email: to_email,
       username,
       verificationLink,
     });

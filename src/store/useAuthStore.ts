@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { User } from "@/src/type";
 import { login } from "@/src/services/authService";
 
 interface AuthStore {

@@ -1,33 +1,67 @@
-import { NextApiRequest, NextApiResponse } from "next";
-import { loginUser } from "@/src/lib/auth";
+import { ApiError } from "@/src/lib/errors";
+import { logger } from "@/src/lib/logger";
+import { loginSchema } from "@/src/utils/schemas/authSchemas";
+import { NextResponse } from "next/server";
 import { z } from "zod";
+import { generateJWT } from "@/src/lib/token";
+import { findUserByEmail } from "@/src/lib/db";
+import { verifyPassword } from "@/src/lib/auth";
 
-// TODO: A déplacer dans le fichier types.ts si besoin ailleurs
-const loginSchema = z.object({
-  email: z.string().email(),
-  password: z.string(),
-});
-
-export async function POST(req: NextApiRequest, res: NextApiResponse) {
+export async function POST(req: Request) {
   try {
-    const { email, password } = loginSchema.parse(req.body);
+    const body = await req.json();
+    const validatedData = loginSchema.parse(body);
 
-    const { user, token } = await loginUser(email, password);
-
-    // TODO: metre en place un logger de succès
-    console.log("User logged in successfully");
-    res.status(200).json({ user, token });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      // TODO: metre en place un logger d'erreur
-      console.error("Invalid input:", error.errors);
-      return res
-        .status(400)
-        .json({ message: "Invalid input", errors: error.errors });
+    const user = await findUserByEmail(validatedData.email);
+    if (!user) {
+      throw new ApiError("Email ou mot de passe incorrect", 401);
     }
 
-    // TODO: metre en place un logger d'erreur
-    console.error("Login error:", error);
-    res.status(500).json({ message: "Error during login" });
+    const isPasswordValid = await verifyPassword({
+      password: validatedData.password,
+      hashedPassword: user.password_hash,
+    });
+    if (!isPasswordValid) {
+      throw new ApiError("Email ou mot de passe incorrect", 401);
+    }
+
+    if (!user.is_verified) {
+      throw new ApiError("Compte non vérifié", 401);
+    }
+
+    const token = generateJWT({
+      userId: user.id,
+      role: user.role,
+      expiresIn: "1d",
+    });
+
+    logger.info(`User ${validatedData.email.split("@")[0]}*** logged in`);
+    return NextResponse.json(
+      { message: "Connexion réussie", token },
+      { status: 200 }
+    );
+  } catch (error) {
+    logger.error("Error during login", error);
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { message: "Les données fournies sont invalides" },
+        { status: 400 }
+      );
+    }
+
+    if (error instanceof ApiError) {
+      return NextResponse.json(
+        { message: error.message },
+        { status: error.status }
+      );
+    }
+
+    return NextResponse.json(
+      {
+        message:
+          "Une erreur est survenue lors de la connexion veuillez réessayer",
+      },
+      { status: 500 }
+    );
   }
 }

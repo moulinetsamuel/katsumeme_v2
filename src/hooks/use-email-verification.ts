@@ -41,7 +41,6 @@ export function useEmailVerification(token: string | null) {
           ...prev,
           pseudo: response.pseudo,
           email: response.email,
-          isLoading: false,
         }));
       } catch (err) {
         if (err instanceof ApiError) {
@@ -49,16 +48,16 @@ export function useEmailVerification(token: string | null) {
             ...prev,
             error: err.message,
             email: err.data?.email || null,
-            isLoading: false,
           }));
         } else {
           setState((prev) => ({
             ...prev,
             error:
               "Une erreur est survenue lors de la vérification de l'email.",
-            isLoading: false,
           }));
         }
+      } finally {
+        setState((prev) => ({ ...prev, isLoading: false }));
       }
     };
 

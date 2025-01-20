@@ -1,4 +1,3 @@
-import { User } from "@/src/type";
 import { RegisterBackendData } from "@/src/utils/schemas/authSchemas";
 import { ApiError } from "@/src/lib/errors";
 
@@ -67,6 +66,7 @@ export async function verifyEmail(token: string) {
   if (!response.ok) {
     throw new ApiError<{ email: string }>(
       responseData.message,
+      responseData.status,
       responseData.data
     );
   }
@@ -74,9 +74,7 @@ export async function verifyEmail(token: string) {
   return responseData;
 }
 
-export async function login(
-  data: LoginData
-): Promise<{ user: User; token: string }> {
+export async function login(data: LoginData) {
   const response = await fetch("/api/auth/login", {
     method: "POST",
     headers: {

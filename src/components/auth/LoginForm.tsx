@@ -10,13 +10,6 @@ import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { ErrorFormMessage } from "../ErrorFormMessage";
 
-// TODO: A déplacer dans un fichier dédié
-const loginSchema = z.object({
-  email: z.string().email("Email invalide"),
-  password: z.string().min(1, "Le mot de passe est requis"),
-});
-type LoginFormData = z.infer<typeof loginSchema>;
-
 interface LoginFormProps {
   onLogin: (data: LoginFormData) => Promise<void>;
   isLoading: boolean;

@@ -35,6 +35,11 @@ const baseSchema = z.object({
   confirmPassword: z.string(),
 });
 
+export const loginSchema = z.object({
+  email: z.string().email("Email invalide"),
+  password: z.string().min(1, "Le mot de passe est requis"),
+});
+
 export const registerFormSchema = baseSchema.refine(
   (data) => data.password === data.confirmPassword,
   {
@@ -52,3 +57,4 @@ export const resendFormSchema = baseSchema.pick({ email: true });
 export type RegisterFormData = z.infer<typeof registerFormSchema>;
 export type RegisterBackendData = z.infer<typeof registerBackendSchema>;
 export type ResendFormData = z.infer<typeof resendFormSchema>;
+export type LoginFormData = z.infer<typeof loginSchema>;
