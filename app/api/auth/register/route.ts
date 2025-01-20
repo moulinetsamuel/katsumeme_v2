@@ -13,14 +13,14 @@ export async function POST(req: Request) {
     const validatedData = registerBackendSchema.parse(body);
 
     const defaultAvatars = [
-      "avatar_default_1.jpeg",
-      "avatar_default_2.jpeg",
-      "avatar_default_3.jpeg",
-      "avatar_default_4.jpeg",
+      "avatar_default_1.jpg",
+      "avatar_default_2.jpg",
+      "avatar_default_3.jpg",
+      "avatar_default_4.jpg",
     ];
     const randomAvatar =
       defaultAvatars[Math.floor(Math.random() * defaultAvatars.length)];
-    const avatarUrl = `https://${process.env.R2_PUBLIC_URL}/${randomAvatar}`;
+    const avatarUrl = `https://${process.env.R2_PUBLIC_URL}/avatars/${randomAvatar}`;
 
     const hashedPassword = await hashPassword(validatedData.password);
     const { verificationToken, tokenExpiresAt } = generateVerificationToken();

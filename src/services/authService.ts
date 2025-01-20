@@ -1,11 +1,6 @@
 import { RegisterBackendData } from "@/src/utils/schemas/authSchemas";
 import { ApiError } from "@/src/lib/errors";
-
-// TODO: A déplacer dans le fichier types.ts si besoin ailleurs
-interface LoginData {
-  email: string;
-  password: string;
-}
+import { LoginFormData } from "@/src/utils/schemas/authSchemas";
 
 export async function register(data: RegisterBackendData) {
   const response = await fetch("/api/auth/register", {
@@ -74,7 +69,7 @@ export async function verifyEmail(token: string) {
   return responseData;
 }
 
-export async function login(data: LoginData) {
+export async function login(data: LoginFormData) {
   const response = await fetch("/api/auth/login", {
     method: "POST",
     headers: {
@@ -87,6 +82,25 @@ export async function login(data: LoginData) {
 
   if (!response.ok) {
     throw new Error(responseData.message || "Erreur lors de la connexion");
+  }
+
+  return responseData;
+}
+
+export async function user(token: string) {
+  const response = await fetch("/api/me", {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const responseData = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      responseData.message || "Erreur lors de la récupération de l'utilisateur"
+    );
   }
 
   return responseData;

@@ -14,8 +14,13 @@ import { RegisterForm } from "@/src/components/auth/RegisterForm";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useToast } from "@/src/hooks/use-toast";
 import { Button } from "@/src/components/ui/button";
-import { register, resendVerificationEmail } from "@/src/services/authService";
 import {
+  login,
+  register,
+  resendVerificationEmail,
+} from "@/src/services/authService";
+import {
+  LoginFormData,
   RegisterBackendData,
   RegisterFormData,
   ResendFormData,
@@ -42,7 +47,11 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     }
   }, [isOpen]);
 
-  const login = useAuthStore((state) => state.login);
+  useEffect(() => {
+    setErrorMessage(null);
+  }, [formType]);
+
+  const fetchUser = useAuthStore((state) => state.fetchUser);
 
   const { toast } = useToast();
 
@@ -95,19 +104,31 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   };
 
   const handleLogin = async (data: LoginFormData) => {
-    // Logique de connexion à implémenter
-    // utiliser la fonction login du store pour se connecter
-    // dans un try catch et toast si success dans le try et toast error dans le catch
-    // pas oublier de bien faire des message d'erreur dans l'api pour pouvoir les afficher dans le toast
-    // si son email n'est pas validé lui dire de le valider et proposer de renvoyer un email de validation comment ?
     setIsLoading(true);
-    toast({
-      title: "Connexion réussie",
-      description: "Vous êtes maintenant connecté",
-    });
-    console.log("Login attempt:", data);
-    onClose();
-    setIsLoading(false);
+    setErrorMessage(null);
+
+    try {
+      const responseLogin = await login(data);
+
+      localStorage.setItem("authToken", responseLogin.token);
+
+      await fetchUser();
+
+      toast({
+        title: "Connexion réussie",
+        description: "Vous êtes maintenant connecté",
+      });
+
+      onClose();
+    } catch (error) {
+      if (error instanceof Error) {
+        setErrorMessage(error.message || "Erreur lors de la connexion");
+      } else {
+        setErrorMessage("Erreur lors de la connexion");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -128,7 +149,11 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         </DialogHeader>
         {formType === "login" && (
           <>
-            <LoginForm onLogin={handleLogin} isLoading={isLoading} />
+            <LoginForm
+              onLogin={handleLogin}
+              isLoading={isLoading}
+              errorMessage={errorMessage}
+            />
             <div className="text-center text-sm">
               <span className="text-muted-foreground">
                 Pas encore de compte ?{" "}

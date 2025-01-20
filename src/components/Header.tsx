@@ -19,7 +19,6 @@ export function Header() {
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
   const logout = useAuthStore((state) => state.logout);
   const user = useAuthStore((state) => state.user);
-
   const { toast } = useToast();
 
   const handleLogout = () => {
@@ -29,6 +28,8 @@ export function Header() {
       description: "Vous avez été déconnecté avec succès",
     });
   };
+
+  console.log(user?.avatar_url);
 
   return (
     <>
@@ -50,9 +51,7 @@ export function Header() {
                     src={user?.avatar_url}
                     alt={`Avatar de ${user?.pseudo}`}
                   />
-                  <AvatarFallback>
-                    {user?.pseudo.charAt(0).toLocaleUpperCase()}
-                  </AvatarFallback>
+                  <AvatarFallback>{user?.pseudo.slice(0, 1)}</AvatarFallback>
                 </Avatar>
               </Link>
               <Button

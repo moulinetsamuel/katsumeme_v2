@@ -5,17 +5,22 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
-import { z } from "zod";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import { ErrorFormMessage } from "../ErrorFormMessage";
+import { ErrorFormMessage } from "@/src/components/ErrorFormMessage";
+import { LoginFormData, loginSchema } from "@/src/utils/schemas/authSchemas";
 
 interface LoginFormProps {
   onLogin: (data: LoginFormData) => Promise<void>;
   isLoading: boolean;
+  errorMessage?: string | null;
 }
 
-export function LoginForm({ onLogin, isLoading }: LoginFormProps) {
+export function LoginForm({
+  onLogin,
+  isLoading,
+  errorMessage,
+}: LoginFormProps) {
   const [showPassword, setShowPassword] = useState(false);
 
   const {
@@ -77,6 +82,9 @@ export function LoginForm({ onLogin, isLoading }: LoginFormProps) {
         </div>
         <ErrorFormMessage message={errors.password?.message} />
       </div>
+      {errorMessage && (
+        <div className="text-red-500 text-sm text-center">{errorMessage}</div>
+      )}
       <Button
         type="submit"
         disabled={isLoading}

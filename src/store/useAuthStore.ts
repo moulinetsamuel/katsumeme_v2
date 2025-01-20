@@ -1,10 +1,11 @@
 import { create } from "zustand";
-import { login } from "@/src/services/authService";
+import { User } from "@/src/type";
+import { user } from "@/src/services/authService";
 
 interface AuthStore {
   user: User | null;
   isLoggedIn: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  fetchUser: () => Promise<User>;
   logout: () => void;
 }
 
@@ -12,11 +13,16 @@ export const useAuthStore = create<AuthStore>((set) => ({
   user: null,
   isLoggedIn: false,
 
-  login: async (email, password) => {
+  fetchUser: async () => {
     try {
-      const { user, token } = await login({ email, password });
-      set({ user, isLoggedIn: true });
-      localStorage.setItem("authToken", token);
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        throw new Error("Token not found");
+      }
+
+      const userResponse = await user(token);
+      set({ user: userResponse.user, isLoggedIn: true });
+      return userResponse;
     } catch (error) {
       throw error;
     }

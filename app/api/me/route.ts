@@ -26,7 +26,7 @@ export async function GET(req: Request) {
       email: user.email,
       pseudo: user.pseudo,
       role: user.role,
-      avatarUrl: user.avatar_url,
+      avatar_url: user.avatar_url,
       createdAt: user.created_at,
     };
 
