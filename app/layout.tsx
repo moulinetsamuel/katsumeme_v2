@@ -26,8 +26,8 @@ export default function RootLayout({
         className={`${inter.variable} ${poppins.variable} font-sans bg-background text-text`}
       >
         <ClientApplication>{children}</ClientApplication>
+        <Toaster />
       </body>
-      <Toaster />
     </html>
   );
 }

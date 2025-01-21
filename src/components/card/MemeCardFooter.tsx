@@ -69,7 +69,7 @@ export function MemeCardFooter({ meme, detail }: MemeCardFooterProps) {
               </Tooltip>
             )}
             <Tooltip>
-              <TooltipTrigger>
+              <TooltipTrigger asChild>
                 <Button variant="ghost" size="icon">
                   <Download className="h-4 w-4" />
                 </Button>
@@ -79,7 +79,7 @@ export function MemeCardFooter({ meme, detail }: MemeCardFooterProps) {
               </TooltipContent>
             </Tooltip>
             <Tooltip>
-              <TooltipTrigger>
+              <TooltipTrigger asChild>
                 <Button variant="ghost" size="icon">
                   {isFavorite ? (
                     <Star className="h-4 w-4 text-katsumeme-yellow" />
