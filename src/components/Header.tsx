@@ -24,6 +24,7 @@ export function Header() {
   const handleLogout = () => {
     logout();
     toast({
+      variant: "destructive",
       title: "Déconnexion réussie",
       description: "Vous avez été déconnecté avec succès",
     });
