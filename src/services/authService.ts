@@ -87,7 +87,7 @@ export async function login(data: LoginFormData) {
   return responseData;
 }
 
-export async function user(token: string) {
+export async function fetchUser(token: string) {
   const response = await fetch("/api/me", {
     method: "GET",
     headers: {
@@ -100,6 +100,46 @@ export async function user(token: string) {
   if (!response.ok) {
     throw new Error(
       responseData.message || "Erreur lors de la récupération de l'utilisateur"
+    );
+  }
+
+  return responseData;
+}
+
+export async function fetchUpdateAvatar(token: string, data: FormData) {
+  const response = await fetch("/api/user/avatar", {
+    method: "PATCH",
+    body: data,
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const responseData = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      responseData.message || "Erreur lors de la mise à jour de l'avatar"
+    );
+  }
+
+  return responseData;
+}
+
+export async function fetchUpdateProfile(token: string, data: FormData) {
+  const response = await fetch("/api/user/profile", {
+    method: "PATCH",
+    body: data,
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const responseData = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      responseData.message || "Erreur lors de la mise à jour du profil"
     );
   }
 

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { User } from "@/src/type";
-import { user } from "@/src/services/authService";
+import { fetchUser } from "@/src/services/authService";
 
 interface AuthStore {
   user: User | null;
@@ -20,7 +20,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
         throw new Error("Token not found");
       }
 
-      const userResponse = await user(token);
+      const userResponse = await fetchUser(token);
       set({ user: userResponse.user, isLoggedIn: true });
       return userResponse;
     } catch (error) {
