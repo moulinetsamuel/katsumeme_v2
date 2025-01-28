@@ -133,3 +133,23 @@ export async function updateUserAvatar(options: UpdateUserAvatarOptions) {
 
   return user;
 }
+
+export async function updateUserPassword(userId: string, newPassword: string) {
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      password_hash: newPassword,
+    },
+  });
+}
+
+export async function updateUserPseudo(userId: string, newPseudo: string) {
+  const user = await prisma.user.update({
+    where: { id: userId },
+    data: {
+      pseudo: newPseudo,
+    },
+  });
+
+  return user.pseudo;
+}

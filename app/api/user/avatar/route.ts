@@ -59,12 +59,13 @@ export async function PATCH(req: Request) {
       }
     }
 
+    logger.info(`Avatar mis à jour pour l'utilisateur: ${user.id}`);
     return NextResponse.json(
       { message: "Avatar mis à jour", avatar_url: updatedUser.avatar_url },
       { status: 200 }
     );
   } catch (error) {
-    logger.error("Erreur lors de l'update user", error);
+    logger.error("Erreur lors de la mise a jour d'avatar", error);
 
     if (newAvatarUrl) {
       try {
@@ -88,7 +89,7 @@ export async function PATCH(req: Request) {
     }
 
     return NextResponse.json(
-      { message: "Erreur lors de l'update user" },
+      { message: "Erreur lors de la mise a jour d'avatar" },
       { status: 500 }
     );
   }

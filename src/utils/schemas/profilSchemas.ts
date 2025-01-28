@@ -32,6 +32,7 @@ export const passwordSchema = z
       )
       .trim(),
     confirmPassword: z.string(),
+    oldPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Les mots de passe ne correspondent pas",

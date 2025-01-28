@@ -40,7 +40,10 @@ import {
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { fetchUpdateAvatar } from "@/src/services/authService";
+import {
+  fetchUpdateAvatar,
+  fetchUpdateProfile,
+} from "@/src/services/authService";
 import React, { useState } from "react";
 import { useToast } from "@/src/hooks/use-toast";
 import {
@@ -57,8 +60,12 @@ export default function ProfilePage() {
   const setUser = useAuthStore((state) => state.setUser);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showOldPassword, setShowOldPassword] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [openAccordion, setOpenAccordion] = useState<string | null>(null);
+
+  const token = localStorage.getItem("authToken");
 
   const { toast } = useToast();
 
@@ -66,15 +73,25 @@ export default function ProfilePage() {
     register: registerPseudo,
     handleSubmit: handleSubmitPseudo,
     formState: { errors: errorsPseudo },
+    reset: resetPseudo,
   } = useForm<PseudoData>({ resolver: zodResolver(pseudoSchema) });
 
   const {
     register: registerPassword,
     handleSubmit: handleSubmitPassword,
     formState: { errors: errorsPassword },
+    reset: resetPassword,
   } = useForm<PasswordData>({ resolver: zodResolver(passwordSchema) });
 
-  if (!isLoggedIn) {
+  const handleAccordionChange = (value: string) => {
+    if (!value) {
+      resetPseudo();
+      resetPassword();
+    }
+    setOpenAccordion(value);
+  };
+
+  if (!isLoggedIn || !token) {
     return (
       <>
         <Header />
@@ -92,24 +109,17 @@ export default function ProfilePage() {
   const handleAvatarChange = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
+    setIsLoading(true);
+    setErrorMessage(null);
     const file = event.target.files?.[0];
     if (!file) return;
-
     const formData = new FormData();
     formData.append("avatar", file);
-
-    const token = localStorage.getItem("authToken");
-    if (!token) return;
-
     try {
-      setIsLoading(true);
-      setErrorMessage(null);
-
       const response = await fetchUpdateAvatar(token, formData);
       if (user) {
         setUser({ ...user, avatar_url: response.avatar_url });
       }
-
       toast({
         title: response.message,
       });
@@ -127,11 +137,59 @@ export default function ProfilePage() {
   };
 
   const onSubmitPseudo = async (data: PseudoData) => {
-    console.log(data);
+    setIsLoading(true);
+    setErrorMessage(null);
+    try {
+      const result = await fetchUpdateProfile(token, data);
+      if (user) {
+        setUser({ ...user, pseudo: result.pseudo });
+      }
+      toast({
+        title: result.message,
+      });
+      resetPseudo();
+      handleAccordionChange("");
+    } catch (error) {
+      if (error instanceof Error) {
+        setErrorMessage(
+          error.message || "Erreur lors de la mise à jour du pseudo"
+        );
+      } else {
+        setErrorMessage("Erreur lors de la mise à jour du pseudo");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const onSubmitPassword = async (data: PasswordData) => {
-    console.log(data);
+    setIsLoading(true);
+    setErrorMessage(null);
+    try {
+      const result = await fetchUpdateProfile(token, data);
+      toast({
+        title: result.message,
+      });
+      resetPassword();
+      handleAccordionChange("");
+    } catch (error) {
+      if (error instanceof Error) {
+        setErrorMessage(
+          error.message || "Erreur lors de la mise à jour du mot de passe"
+        );
+      } else {
+        setErrorMessage("Erreur lors de la mise à jour du mot de passe");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    console.log("Suppression du compte");
+    toast({
+      title: "Votre compte a été supprimé",
+    });
   };
 
   return (
@@ -193,7 +251,13 @@ export default function ProfilePage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Accordion type="single" collapsible className="w-full">
+            <Accordion
+              type="single"
+              collapsible
+              value={openAccordion || ""}
+              onValueChange={handleAccordionChange}
+              className="w-full"
+            >
               <AccordionItem value="pseudo">
                 <AccordionTrigger>Modifier mon pseudo</AccordionTrigger>
                 <AccordionContent>
@@ -203,11 +267,7 @@ export default function ProfilePage() {
                       onSubmit={handleSubmitPseudo(onSubmitPseudo)}
                     >
                       <Label htmlFor="pseudo">Nouveau pseudo</Label>
-                      <Input
-                        id="pseudo"
-                        {...registerPseudo("pseudo")}
-                        defaultValue={user?.pseudo}
-                      />
+                      <Input id="pseudo" {...registerPseudo("pseudo")} />
                       <ErrorFormMessage
                         message={errorsPseudo.pseudo?.message}
                       />
@@ -227,6 +287,37 @@ export default function ProfilePage() {
                     >
                       <div className="space-y-2">
                         <Label htmlFor="password">Mot de passe</Label>
+                        <div className="relative">
+                          <Input
+                            id="oldPassword"
+                            type={showOldPassword ? "text" : "password"}
+                            {...registerPassword("oldPassword")}
+                            aria-invalid={!!errorsPassword.oldPassword}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowOldPassword(!showOldPassword)}
+                            className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                            aria-label={
+                              showOldPassword
+                                ? "Masquer le mot de passe"
+                                : "Afficher le mot de passe"
+                            }
+                          >
+                            {showOldPassword ? (
+                              <EyeOff className="h-5 w-5" />
+                            ) : (
+                              <Eye className="h-5 w-5" />
+                            )}
+                          </button>
+                        </div>
+                        <ErrorFormMessage
+                          message={errorsPassword.oldPassword?.message}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="password">Nouveau mot de passe</Label>
                         <div className="relative">
                           <Input
                             id="password"
@@ -258,7 +349,7 @@ export default function ProfilePage() {
 
                       <div className="space-y-2">
                         <Label htmlFor="confirmPassword">
-                          Confirmez le mot de passe
+                          Confirmez le nouveau mot de passe
                         </Label>
                         <div className="relative">
                           <Input
@@ -357,7 +448,10 @@ export default function ProfilePage() {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Annuler</AlertDialogCancel>
-                  <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                  <AlertDialogAction
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    onClick={handleDeleteAccount}
+                  >
                     Supprimer mon compte
                   </AlertDialogAction>
                 </AlertDialogFooter>

@@ -4,7 +4,7 @@ export const logger = {
       type: (error as Error).constructor.name,
       message: (error as Error).message,
       code: (error as { code?: string }).code,
-      stack: (error as Error).stack,
+      // stack: (error as Error).stack,
       timestamp: new Date().toISOString(),
     });
   },
