@@ -116,3 +116,20 @@ export async function updateUserVerificationStatus(userId: string) {
 
   return user;
 }
+
+interface UpdateUserAvatarOptions {
+  userId: string;
+  newAvatarUrl: string;
+}
+export async function updateUserAvatar(options: UpdateUserAvatarOptions) {
+  const { userId, newAvatarUrl } = options;
+
+  const user = await prisma.user.update({
+    where: { id: userId },
+    data: {
+      avatar_url: newAvatarUrl,
+    },
+  });
+
+  return user;
+}

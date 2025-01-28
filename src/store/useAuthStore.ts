@@ -7,11 +7,14 @@ interface AuthStore {
   isLoggedIn: boolean;
   fetchUser: () => Promise<User>;
   logout: () => void;
+  setUser: (user: User | null) => void;
 }
 
 export const useAuthStore = create<AuthStore>((set) => ({
   user: null,
   isLoggedIn: false,
+
+  setUser: (user) => set({ user }),
 
   fetchUser: async () => {
     try {

@@ -18,7 +18,7 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/src/components/ui/avatar";
-import { AlertCircle, Camera, User } from "lucide-react";
+import { AlertCircle, Camera, Eye, EyeOff, User } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/src/components/ui/alert";
 import {
   Accordion,
@@ -38,22 +38,27 @@ import {
   AlertDialogTrigger,
 } from "@/src/components/ui/alert-dialog";
 import { useAuthStore } from "@/src/store/useAuthStore";
-import { set, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { fetchUpdateAvatar } from "@/src/services/authService";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useToast } from "@/src/hooks/use-toast";
 import {
+  PasswordData,
   passwordSchema,
+  PseudoData,
   pseudoSchema,
 } from "@/src/utils/schemas/profilSchemas";
+import { ErrorFormMessage } from "@/src/components/ErrorFormMessage";
 
 export default function ProfilePage() {
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
   const user = useAuthStore((state) => state.user);
-  const [avatar, setAvatar] = useState(user?.avatar_url || "");
+  const setUser = useAuthStore((state) => state.setUser);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const { toast } = useToast();
 
@@ -61,13 +66,13 @@ export default function ProfilePage() {
     register: registerPseudo,
     handleSubmit: handleSubmitPseudo,
     formState: { errors: errorsPseudo },
-  } = useForm({ resolver: zodResolver(pseudoSchema) });
+  } = useForm<PseudoData>({ resolver: zodResolver(pseudoSchema) });
 
   const {
     register: registerPassword,
     handleSubmit: handleSubmitPassword,
     formState: { errors: errorsPassword },
-  } = useForm({ resolver: zodResolver(passwordSchema) });
+  } = useForm<PasswordData>({ resolver: zodResolver(passwordSchema) });
 
   if (!isLoggedIn) {
     return (
@@ -84,12 +89,15 @@ export default function ProfilePage() {
     );
   }
 
-  const handleAvatarChange = async (event) => {
-    const file = event.target.files[0];
+  const handleAvatarChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
     if (!file) return;
 
     const formData = new FormData();
     formData.append("avatar", file);
+
     const token = localStorage.getItem("authToken");
     if (!token) return;
 
@@ -98,10 +106,12 @@ export default function ProfilePage() {
       setErrorMessage(null);
 
       const response = await fetchUpdateAvatar(token, formData);
-      setAvatar(response.avatar_url);
+      if (user) {
+        setUser({ ...user, avatar_url: response.avatar_url });
+      }
+
       toast({
-        title: "Avatar mis à jour",
-        description: response.message,
+        title: response.message,
       });
     } catch (error) {
       if (error instanceof Error) {
@@ -116,6 +126,14 @@ export default function ProfilePage() {
     }
   };
 
+  const onSubmitPseudo = async (data: PseudoData) => {
+    console.log(data);
+  };
+
+  const onSubmitPassword = async (data: PasswordData) => {
+    console.log(data);
+  };
+
   return (
     <>
       <Header />
@@ -125,7 +143,10 @@ export default function ProfilePage() {
           <div className="flex items-center gap-6">
             <div className="relative">
               <Avatar className="w-24 h-24">
-                <AvatarImage src={avatar} alt={`Avatar de ${user?.pseudo}`} />
+                <AvatarImage
+                  src={user?.avatar_url}
+                  alt={`Avatar de ${user?.pseudo}`}
+                />
                 <AvatarFallback>
                   <User className="w-12 h-12" />
                 </AvatarFallback>
@@ -134,6 +155,7 @@ export default function ProfilePage() {
                 size="icon"
                 className="absolute bottom-0 right-0 rounded-full"
                 variant="secondary"
+                disabled={isLoading}
               >
                 <Label htmlFor="avatar-upload" className="cursor-pointer">
                   <Camera className="w-4 h-4" />
@@ -176,14 +198,21 @@ export default function ProfilePage() {
                 <AccordionTrigger>Modifier mon pseudo</AccordionTrigger>
                 <AccordionContent>
                   <div className="space-y-4 pt-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="new-username">Nouveau pseudo</Label>
+                    <form
+                      className="space-y-2"
+                      onSubmit={handleSubmitPseudo(onSubmitPseudo)}
+                    >
+                      <Label htmlFor="pseudo">Nouveau pseudo</Label>
                       <Input
-                        id="new-username"
-                        placeholder="Entrez votre nouveau pseudo"
+                        id="pseudo"
+                        {...registerPseudo("pseudo")}
+                        defaultValue={user?.pseudo}
                       />
-                    </div>
-                    <Button>Enregistrer</Button>
+                      <ErrorFormMessage
+                        message={errorsPseudo.pseudo?.message}
+                      />
+                      <Button type="submit">Enregistrer</Button>
+                    </form>
                   </div>
                 </AccordionContent>
               </AccordionItem>
@@ -191,18 +220,78 @@ export default function ProfilePage() {
               <AccordionItem value="password">
                 <AccordionTrigger>Modifier mon mot de passe</AccordionTrigger>
                 <AccordionContent>
-                  <div className="space-y-4 pt-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="new-password">Nouveau mot de passe</Label>
-                      <Input id="new-password" type="password" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="confirm-password">
-                        Confirmer le mot de passe
-                      </Label>
-                      <Input id="confirm-password" type="password" />
-                    </div>
-                    <Button>Enregistrer</Button>
+                  <div className="pt-2">
+                    <form
+                      onSubmit={handleSubmitPassword(onSubmitPassword)}
+                      className="space-y-2"
+                    >
+                      <div className="space-y-2">
+                        <Label htmlFor="password">Mot de passe</Label>
+                        <div className="relative">
+                          <Input
+                            id="password"
+                            type={showPassword ? "text" : "password"}
+                            {...registerPassword("password")}
+                            aria-invalid={!!errorsPassword.password}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                            aria-label={
+                              showPassword
+                                ? "Masquer le mot de passe"
+                                : "Afficher le mot de passe"
+                            }
+                          >
+                            {showPassword ? (
+                              <EyeOff className="h-5 w-5" />
+                            ) : (
+                              <Eye className="h-5 w-5" />
+                            )}
+                          </button>
+                        </div>
+                        <ErrorFormMessage
+                          message={errorsPassword.password?.message}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="confirmPassword">
+                          Confirmez le mot de passe
+                        </Label>
+                        <div className="relative">
+                          <Input
+                            id="confirmPassword"
+                            type={showConfirmPassword ? "text" : "password"}
+                            {...registerPassword("confirmPassword")}
+                            aria-invalid={!!errorsPassword.confirmPassword}
+                          />
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setShowConfirmPassword(!showConfirmPassword)
+                            }
+                            className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                            aria-label={
+                              showConfirmPassword
+                                ? "Masquer la confirmation du mot de passe"
+                                : "Afficher la confirmation du mot de passe"
+                            }
+                          >
+                            {showConfirmPassword ? (
+                              <EyeOff className="h-5 w-5" />
+                            ) : (
+                              <Eye className="h-5 w-5" />
+                            )}
+                          </button>
+                        </div>
+                        <ErrorFormMessage
+                          message={errorsPassword.confirmPassword?.message}
+                        />
+                      </div>
+                      <Button type="submit">Enregistrer</Button>
+                    </form>
                   </div>
                 </AccordionContent>
               </AccordionItem>

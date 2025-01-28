@@ -1,6 +1,7 @@
 import { RegisterBackendData } from "@/src/utils/schemas/authSchemas";
 import { ApiError } from "@/src/lib/errors";
 import { LoginFormData } from "@/src/utils/schemas/authSchemas";
+import { PasswordData, PseudoData } from "@/src/utils/schemas/profilSchemas";
 
 export async function register(data: RegisterBackendData) {
   const response = await fetch("/api/auth/register", {
@@ -126,10 +127,13 @@ export async function fetchUpdateAvatar(token: string, data: FormData) {
   return responseData;
 }
 
-export async function fetchUpdateProfile(token: string, data: FormData) {
+export async function fetchUpdateProfile(
+  token: string,
+  data: PseudoData | PasswordData
+) {
   const response = await fetch("/api/user/profile", {
     method: "PATCH",
-    body: data,
+    body: JSON.stringify(data),
     headers: {
       Authorization: `Bearer ${token}`,
     },
