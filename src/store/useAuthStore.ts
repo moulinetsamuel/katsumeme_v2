@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { User } from "@/src/type";
-import { fetchUser } from "@/src/services/authService";
+import { fetchUser } from "@/src/services/userService";
 
 interface AuthStore {
   user: User | null;

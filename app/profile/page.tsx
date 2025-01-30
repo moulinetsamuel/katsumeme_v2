@@ -41,9 +41,10 @@ import { useAuthStore } from "@/src/store/useAuthStore";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
+  fetchDeleteUser,
   fetchUpdateAvatar,
   fetchUpdateProfile,
-} from "@/src/services/authService";
+} from "@/src/services/userService";
 import React, { useState } from "react";
 import { useToast } from "@/src/hooks/use-toast";
 import {
@@ -58,6 +59,7 @@ export default function ProfilePage() {
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
   const user = useAuthStore((state) => state.user);
   const setUser = useAuthStore((state) => state.setUser);
+  const logout = useAuthStore((state) => state.logout);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showOldPassword, setShowOldPassword] = useState(false);
@@ -186,10 +188,26 @@ export default function ProfilePage() {
   };
 
   const handleDeleteAccount = async () => {
-    console.log("Suppression du compte");
-    toast({
-      title: "Votre compte a été supprimé",
-    });
+    setIsLoading(true);
+    setErrorMessage(null);
+
+    try {
+      const result = await fetchDeleteUser(token);
+      logout();
+      toast({
+        title: result.message,
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        setErrorMessage(
+          error.message || "Erreur lors de la suppression du compte"
+        );
+      } else {
+        setErrorMessage("Erreur lors de la suppression du compte");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

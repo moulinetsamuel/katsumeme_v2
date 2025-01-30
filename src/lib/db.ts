@@ -1,5 +1,14 @@
 import prisma from "@/src/lib/prisma";
 import { sendVerificationEmail } from "@/src/lib/email";
+import { deleteAvatarFromR2 } from "@/src/lib/cloudflareR2";
+import { logger } from "@/src/lib/logger";
+
+const defaultAvatars = [
+  "https://files.katsumeme.com/avatars/avatar_default_1.jpg",
+  "https://files.katsumeme.com/avatars/avatar_default_2.jpg",
+  "https://files.katsumeme.com/avatars/avatar_default_3.jpg",
+  "https://files.katsumeme.com/avatars/avatar_default_4.jpg",
+];
 
 export async function findUserByEmail(email: string) {
   const user = await prisma.user.findUnique({
@@ -152,4 +161,27 @@ export async function updateUserPseudo(userId: string, newPseudo: string) {
   });
 
   return user.pseudo;
+}
+
+export async function deleteUser(userId: string) {
+  const user = await prisma.user.delete({
+    where: { id: userId },
+  });
+
+  if (user.avatar_url && !defaultAvatars.includes(user.avatar_url)) {
+    const oldFileName = user.avatar_url.split("/").pop();
+
+    if (oldFileName) {
+      try {
+        await deleteAvatarFromR2(oldFileName);
+      } catch (error) {
+        logger.error(
+          `Erreur lors de la suppression de l'avatar: ${oldFileName}`,
+          error
+        );
+      }
+    }
+  }
+
+  return user;
 }
